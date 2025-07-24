@@ -1,8 +1,10 @@
 package gdd.scene;
 
+import gdd.ActivePowerUp;
 import gdd.AudioPlayer;
 import gdd.Game;
 import static gdd.Global.*;
+import gdd.ScoreManager;
 import gdd.SpawnDetails;
 import gdd.powerup.PowerUp;
 import gdd.powerup.SpeedUp;
@@ -15,6 +17,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,6 +25,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import javax.swing.ImageIcon;
@@ -37,11 +41,15 @@ public class Scene1 extends JPanel {
     private List<Shot> shots;
     private Player player;
     private Shot shot;
+    private final List<ActivePowerUp> activePowerUps = new ArrayList<>();
+    private static final int SHOT_COOLDOWN_MS = 300;
+    private long lastShotTime = 0;
+
 
     final int BLOCKHEIGHT = 50;
     final int BLOCKWIDTH = 50;
 
-    final int BLOCKS_TO_DRAW = BOARD_HEIGHT / BLOCKHEIGHT;
+    //final int BLOCKS_TO_DRAW = BOARD_HEIGHT / BLOCKHEIGHT;
 
     private int direction = -1;
     private int deaths = 0;
@@ -55,9 +63,8 @@ public class Scene1 extends JPanel {
     private Timer timer;
     private final Game game;
 
-    private int currentRow = -1;
-    // TODO load this map from a file
-    private int mapOffset = 0;
+    //private int currentRow = -1;
+    //private int mapOffset = 0;
     private final int[][] MAP = {
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -87,13 +94,12 @@ public class Scene1 extends JPanel {
 
     private final HashMap<Integer, SpawnDetails> spawnMap = new HashMap<>();
     private AudioPlayer audioPlayer;
-    private int lastRowToShow;
-    private int firstRowToShow;
+    //private int lastRowToShow;
+    //private int firstRowToShow;
 
     public Scene1(Game game) {
         this.game = game;
         initBoard();
-        gameInit();
         loadSpawnDetails();
     }
 
@@ -106,21 +112,59 @@ public class Scene1 extends JPanel {
         }
     }
 
+    private void explAudio() {
+        try {
+            audioPlayer = new AudioPlayer(SND_EXPL);
+            audioPlayer.play();
+        } catch (Exception e) {
+            System.err.println("Error initializing audio player: " + e.getMessage());
+        }
+    }
+
+    private void shotAudio() {
+        try {
+            audioPlayer = new AudioPlayer(SND_SHOT);
+            audioPlayer.play();
+        } catch (Exception e) {
+            System.err.println("Error initializing audio player: " + e.getMessage());
+        }
+    }
+
+    private void bombAudio() {
+        try {
+            audioPlayer = new AudioPlayer(SND_LZR[randomizer.nextInt(0,1)]);
+            audioPlayer.play();
+        } catch (Exception e) {
+            System.err.println("Error initializing audio player: " + e.getMessage());
+        }
+    }
+
+    private void powerupAudio() {
+        try {
+            audioPlayer = new AudioPlayer(SND_POWERUP);
+            audioPlayer.play();
+        } catch (Exception e) {
+            System.err.println("Error initializing audio player: " + e.getMessage());
+        }
+    }
+
     private void loadSpawnDetails() {
-        // TODO load this from a file
-        spawnMap.put(50, new SpawnDetails("PowerUp-SpeedUp", 100, 0));
-        spawnMap.put(200, new SpawnDetails("Alien1", 200, 0));
-        spawnMap.put(300, new SpawnDetails("Alien1", 300, 0));
 
-        spawnMap.put(400, new SpawnDetails("Alien1", 400, 0));
-        spawnMap.put(401, new SpawnDetails("Alien1", 450, 0));
-        spawnMap.put(402, new SpawnDetails("Alien1", 500, 0));
-        spawnMap.put(403, new SpawnDetails("Alien1", 550, 0));
+        spawnMap.put(50, new SpawnDetails("PowerUp-SpeedUp", randomizer.nextInt(0, 400), 0));
+        spawnMap.put(200, new SpawnDetails("Alien1", randomizer.nextInt(100, 300), 0));
+        spawnMap.put(300, new SpawnDetails("Alien1", randomizer.nextInt(200, 400), 0));
 
-        spawnMap.put(500, new SpawnDetails("Alien1", 100, 0));
-        spawnMap.put(501, new SpawnDetails("Alien1", 150, 0));
-        spawnMap.put(502, new SpawnDetails("Alien1", 200, 0));
-        spawnMap.put(503, new SpawnDetails("Alien1", 350, 0));
+        int randspawn1 = randomizer.nextInt(200, 600);
+        spawnMap.put(400, new SpawnDetails("Alien1", randspawn1, 0));
+        spawnMap.put(401, new SpawnDetails("Alien1", randspawn1 + 50, 0));
+
+        spawnMap.put(450, new SpawnDetails("PowerUp-SpeedUp", randomizer.nextInt(200, 600), 0));
+
+        int randspawn2 = randomizer.nextInt(0, 200);
+        spawnMap.put(500, new SpawnDetails("Alien1", randspawn2, 0));
+        spawnMap.put(501, new SpawnDetails("Alien1", randspawn2+ 50, 0));
+        spawnMap.put(502, new SpawnDetails("Alien1", randspawn2 + 100, 0));
+        spawnMap.put(503, new SpawnDetails("Alien1", randspawn2 + 150, 0));
     }
 
     private void initBoard() {
@@ -133,7 +177,7 @@ public class Scene1 extends JPanel {
         requestFocusInWindow();
         setBackground(Color.black);
 
-        timer = new Timer(1000 / 60, new GameCycle());
+        timer = new Timer(1000 / 30, new GameCycle());
         timer.start();
 
         gameInit();
@@ -159,11 +203,11 @@ public class Scene1 extends JPanel {
         shots = new ArrayList<>();
 
         for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 6; j++) {
-        var enemy = new Enemy(ALIEN_INIT_X + (ALIEN_WIDTH + ALIEN_GAP) * j,
-        ALIEN_INIT_Y + (ALIEN_HEIGHT + ALIEN_GAP) * i);
-        enemies.add(enemy);
-        }
+            for (int j = 0; j < 6; j++) {
+                var enemy = new Enemy(ALIEN_INIT_X + (ALIEN_WIDTH + ALIEN_GAP) * j,
+                ALIEN_INIT_Y + (ALIEN_HEIGHT + ALIEN_GAP) * i);
+                enemies.add(enemy);
+            }
         }
         player = new Player();
         shot = new Shot();
@@ -233,7 +277,7 @@ public class Scene1 extends JPanel {
         for (Enemy enemy : enemies) {
 
             if (enemy.isVisible()) {
-
+                
                 g.drawImage(enemy.getImage(), enemy.getX(), enemy.getY(), this);
             }
 
@@ -274,14 +318,13 @@ public class Scene1 extends JPanel {
     }
 
     private void drawShot(Graphics g) {
-
         for (Shot shot : shots) {
-
             if (shot.isVisible()) {
                 g.drawImage(shot.getImage(), shot.getX(), shot.getY(), this);
             }
         }
     }
+
 
     private void drawBombing(Graphics g) {
 
@@ -289,6 +332,7 @@ public class Scene1 extends JPanel {
              Enemy.Bomb b = e.getBomb();
              if (!b.isDestroyed()) {
                  g.drawImage(b.getImage(), b.getX(), b.getY(), this);
+                 //bombAudio();
              }
          }
     }
@@ -311,6 +355,46 @@ public class Scene1 extends JPanel {
         explosions.removeAll(toRemove);
     }
 
+    private void drawUI(Graphics g) {
+        g.setColor(Color.green);
+        g.setFont(g.getFont().deriveFont(20f));
+        g.drawString("Score: " + ScoreManager.getInstance().getScore(), 30, 640);
+
+        g.setColor(Color.green);
+        g.setFont(g.getFont().deriveFont(20f));
+        g.drawString("Power-Ups", 420, 640);
+        
+        int[] xSlots = {540, 581, 622}; // Slot positions
+
+        var uiIcon = new ImageIcon(IMG_UI);
+        var uiImage = uiIcon.getImage();
+        g.drawImage(uiImage, 540, 615, this);
+        g.drawImage(uiImage, 581, 615, this);
+        g.drawImage(uiImage, 622, 615, this);
+        
+        for (int i = 0; i < activePowerUps.size(); i++) {
+            ActivePowerUp ap = activePowerUps.get(i);
+            int x = xSlots[i];
+
+            // Draw slot background
+            g.drawImage(uiImage, x, 615, this);
+
+            // Draw power-up icon
+            g.drawImage(ap.image, x, 615, this);
+
+            // timer bar
+            int barWidth = 30;
+            int barHeight = 4;
+            int fillWidth = (int)(barWidth * ap.getProgress());
+
+            g.setColor(Color.GREEN); // or Color.YELLOW if low
+            if (ap.getProgress() < 0.25f) g.setColor(Color.RED);
+
+            g.fillRect(x, 615 + 32, fillWidth, barHeight);
+        }
+    }
+
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -331,13 +415,13 @@ public class Scene1 extends JPanel {
         if (inGame) {
 
             drawMap(g);  // Draw background stars first
-            drawExplosions(g);
             drawPowerUps(g);
             drawAliens(g);
             drawPlayer(g);
+            drawExplosions(g);
             drawShot(g);
             drawBombing(g);
-
+            drawUI(g);
         } else {
 
             if (timer.isRunning()) {
@@ -371,6 +455,7 @@ public class Scene1 extends JPanel {
 
     private void update() {
 
+        ScoreManager.getInstance().update();
 
         // Check enemy spawn
         //TODO this approach can only spawn one enemy at a frame
@@ -379,27 +464,30 @@ public class Scene1 extends JPanel {
             // Create a new enemy based on the spawn details
             switch (sd.type) {
                 case "Alien1" -> {
-                    Enemy enemy = new Alien1(sd.x, sd.y);
+                    Enemy enemy = new Alien1(sd.x, sd.y, false);
                     enemies.add(enemy);
                 }
                 case "Alien2" -> {
+                    // Add support for Alien2 later
                 }
                 case "PowerUp-SpeedUp" -> {
-                    // Handle speed up item spawn
                     PowerUp speedUp = new SpeedUp(sd.x, sd.y);
                     powerups.add(speedUp);
+
                 }
                 default -> System.out.println("Unknown enemy type: " + sd.type);
             }
+
             // Add more cases for different enemy types if needed
             // Enemy enemy2 = new Alien2(sd.x, sd.y);
             // enemies.add(enemy2);
                     }
 
-        if (deaths == NUMBER_OF_ALIENS_TO_DESTROY) {
+        if (deaths == 32) {
             inGame = false;
             timer.stop();
             message = "Game won!";
+            ScoreManager.getInstance().addLevelCompletion();
         }
 
         // player
@@ -411,9 +499,22 @@ public class Scene1 extends JPanel {
                 powerup.act(0);
                 if (powerup.collidesWith(player)) {
                     powerup.upgrade(player);
+                    ScoreManager.getInstance().addPowerUp();
+                    Image powerUpIcon = new ImageIcon(IMG_POWERUP_SPEEDUP).getImage(); 
+                    activePowerUps.add(new ActivePowerUp(powerUpIcon));
                 }
             }
         }
+
+        Iterator<ActivePowerUp> iter = activePowerUps.iterator();
+        while (iter.hasNext()) {
+            ActivePowerUp ap = iter.next();
+            ap.tick();
+            if (ap.isExpired()) {
+                iter.remove(); // Remove from UI
+            }
+        }
+
 
         // Enemies
         for (Enemy enemy : enemies) {
@@ -427,6 +528,7 @@ public class Scene1 extends JPanel {
         for (Shot shot : shots) {
 
             if (shot.isVisible()) {
+                shot.act(0);
                 int shotX = shot.getX();
                 int shotY = shot.getY();
 
@@ -441,9 +543,9 @@ public class Scene1 extends JPanel {
                             && shotY >= (enemyY)
                             && shotY <= (enemyY + ALIEN_HEIGHT)) {
 
-                        var ii = new ImageIcon(IMG_EXPLOSION);
-                        enemy.setImage(ii.getImage());
+                        //explAudio();
                         enemy.setDying(true);
+                        ScoreManager.getInstance().addEnemyKill();
                         explosions.add(new Explosion(enemyX, enemyY));
                         deaths++;
                         shot.die();
@@ -452,13 +554,10 @@ public class Scene1 extends JPanel {
                 }
 
                 int y = shot.getY();
-                y -= 20;
 
                 if (y < 0) {
                     shot.die();
                     shotsToRemove.add(shot);
-                } else {
-                    shot.setY(y);
                 }
             }
         }
@@ -466,20 +565,27 @@ public class Scene1 extends JPanel {
 
 
         for (Enemy enemy : enemies) {
-             int x = enemy.getX();
-             if (x >= BOARD_WIDTH - BORDER_RIGHT && direction != -1) {
-                 direction = -1;
-                 for (Enemy e2 : enemies) {
-                     e2.setY(e2.getY() + GO_DOWN);
-                 }
-             }
-             if (x <= BORDER_LEFT && direction != 1) {
-                 direction = 1;
-                 for (Enemy e : enemies) {
-                     e.setY(e.getY() + GO_DOWN);
-                 }
-             }
-         }
+            int x = enemy.getX();
+
+            if (x >= BOARD_WIDTH - BORDER_RIGHT && direction != -1) {
+                direction = -1;
+                for (Enemy e2 : enemies) {
+                    if (e2.isMainWave()) {
+                        e2.setY(e2.getY() + GO_DOWN);
+                    }
+                }
+            }
+
+            if (x <= BORDER_LEFT && direction != 1) {
+                direction = 1;
+                for (Enemy e : enemies) {
+                    if (e.isMainWave()) {
+                        e.setY(e.getY() + GO_DOWN);
+                    }
+                }
+            }
+        }
+
          for (Enemy enemy : enemies) {
              if (enemy.isVisible()) {
                  int y = enemy.getY();
@@ -494,8 +600,8 @@ public class Scene1 extends JPanel {
          //Bomb is with enemy, so it loops over enemies
         
         for (Enemy enemy : enemies) {
-
-            int chance = randomizer.nextInt(15);
+            if (frame > 50){
+                int chance = randomizer.nextInt(15);
             Enemy.Bomb bomb = enemy.getBomb();
 
             if (chance == CHANCE && enemy.isVisible() && bomb.isDestroyed()) {
@@ -516,17 +622,17 @@ public class Scene1 extends JPanel {
                     && bombY >= (playerY)
                     && bombY <= (playerY + PLAYER_HEIGHT)) {
 
-                var ii = new ImageIcon(IMG_EXPLOSION);
-                player.setImage(ii.getImage());
+                //explAudio();
                 player.setDying(true);
                 bomb.setDestroyed(true);
             }
 
             if (!bomb.isDestroyed()) {
-                bomb.setY(bomb.getY() + 1);
+                bomb.setY(bomb.getY() + 2);
                 if (bomb.getY() >= GROUND - BOMB_HEIGHT) {
                     bomb.setDestroyed(true);
                 }
+            }
             }
         }
          
@@ -555,7 +661,7 @@ public class Scene1 extends JPanel {
 
         @Override
         public void keyPressed(KeyEvent e) {
-            System.out.println("Scene1.keyPressed: " + e.getKeyCode());
+            //System.out.println("Scene1.keyPressed: " + e.getKeyCode());
 
             player.keyPressed(e);
 
@@ -565,13 +671,24 @@ public class Scene1 extends JPanel {
             int key = e.getKeyCode();
 
             if (key == KeyEvent.VK_SPACE && inGame) {
-                System.out.println("Shots: " + shots.size());
-                if (shots.size() < 4) {
-                    // Create a new shot and add it to the list
-                    Shot shot = new Shot(x, y);
-                    shots.add(shot);
+                long now = System.currentTimeMillis();
+            //System.out.println("Shots: " + shots.size());
+            if (shots.size() < 9 && now - lastShotTime > SHOT_COOLDOWN_MS) {
+                lastShotTime = now;
+                int shotMode = player.getShot();
+                if (shotMode == 1) {
+                    shots.add(new Shot(x, y, 0));
+                    //shotAudio();
+                } else if (shotMode == 2) {
+                    double angle = Math.toRadians(10); 
+                    shots.add(new Shot(x, y, 0));                // center
+                    shots.add(new Shot(x, y, -angle));          // left
+                    shots.add(new Shot(x, y, angle));           // right
+                    // another??? shotAudio();
                 }
             }
+        }
+
 
         }
     }

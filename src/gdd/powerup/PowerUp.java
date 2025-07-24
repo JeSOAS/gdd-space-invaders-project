@@ -1,8 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package gdd.powerup;
 
 import gdd.sprite.Player;
@@ -16,7 +11,7 @@ abstract public class PowerUp extends Sprite {
     }
 
     abstract public void upgrade(Player player);
-
+    
     @Override
     public void act(int direction) {}
 }

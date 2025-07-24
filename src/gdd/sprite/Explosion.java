@@ -7,7 +7,6 @@ public class Explosion extends Sprite {
 
 
     public Explosion(int x, int y) {
-
         initExplosion(x, y);
     }
 
@@ -16,7 +15,7 @@ public class Explosion extends Sprite {
         this.x = x;
         this.y = y;
 
-        var ii = new ImageIcon(IMG_EXPLOSION);
+        var ii = new ImageIcon(IMG_EXPLOSION2);
 
         // Scale the image to use the global scaling factor
         var scaledImage = ii.getImage().getScaledInstance(ii.getIconWidth() * SCALE_FACTOR,

@@ -1,8 +1,6 @@
 package gdd;
 
 import gdd.scene.Scene1;
-import gdd.scene.Scene2;
-import gdd.scene.Scene3;
 import gdd.scene.TitleScene;
 import javax.swing.JFrame;
 
@@ -10,14 +8,13 @@ public final class Game extends JFrame  {
 
     TitleScene titleScene;
     Scene1 scene1;
-    Scene2 scene2;
-    Scene3 scene3;
 
     public Game() {
         titleScene = new TitleScene(this);
         scene1 = new Scene1(this);
         initUI();
         loadTitle();
+        //loadScene1();
     }
 
     private void initUI() {
@@ -48,21 +45,4 @@ public final class Game extends JFrame  {
         repaint();
     }
 
-    public void loadScene2() {
-        getContentPane().removeAll();
-        add(scene2);
-        titleScene.stop();
-        scene2.start();
-        revalidate();
-        repaint();
-    }
-
-    public void loadScene3() {
-        getContentPane().removeAll();
-        add(scene3);
-        titleScene.stop();
-        scene3.start();
-        revalidate();
-        repaint();
-    }
 }

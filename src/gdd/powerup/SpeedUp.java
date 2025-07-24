@@ -4,12 +4,6 @@ import static gdd.Global.*;
 import gdd.sprite.Player;
 import javax.swing.ImageIcon;
 
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
-
 public class SpeedUp extends PowerUp {
 
     public SpeedUp(int x, int y) {
@@ -22,18 +16,24 @@ public class SpeedUp extends PowerUp {
 
     @Override
     public void act(int direction) {
-        // SpeedUp specific behavior can be added here
-        // For now, it just moves down the screen
-        this.y += 2; // Move down by 2 pixel each frame
+        this.y += 3; // Move down by 3 pixels each frame
     }
 
     
     @Override
     public void upgrade(Player player) {
         // Upgrade the player with speed boost
-        player.setSpeed(player.getSpeed() + 4); // Increase player's speed by 1
-        this.die(); // Remove the power-up after use
+        int boostAmount = 4;
+        player.setSpeed(player.getSpeed() + boostAmount); // Increase speed
+        this.die(); // Remove the power-up from screen
+
+        // Create a timer to revert the speed boost after 10 seconds (600 frames @ 60 FPS)
+        new javax.swing.Timer(10000, e -> {
+            player.setSpeed(player.getSpeed() - boostAmount); // Revert speed
+            ((javax.swing.Timer) e.getSource()).stop(); // Stop the timer
+        }).start();
     }
+
 
 
 }

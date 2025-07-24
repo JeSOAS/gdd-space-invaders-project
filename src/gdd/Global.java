@@ -24,8 +24,7 @@ public class Global {
     public static final int ALIEN_GAP = 30; // Gap between aliens
 
     public static final int GO_DOWN = 30; // Doubled from 15
-    public static final int NUMBER_OF_ALIENS_TO_DESTROY = 24;
-    public static final int CHANCE = 5;
+    public static final int CHANCE = 1;
     public static final int DELAY = 17;
     public static final int PLAYER_WIDTH = 45; // Corrected
     public static final int PLAYER_HEIGHT = 20; // Doubled from 10
@@ -40,6 +39,9 @@ public class Global {
     public static final String IMG_TITLE = "/images/title.png";
     public static final String IMG_POWERUP_SPEEDUP = "images/powerup-s.png";
     public static final String IMG_BOMB = "images/bomb.png";
+    public static final String IMG_POWERUP_TRIPLE = "images/triple.png";
+    public static final String IMG_UI = "images/powerUi.png";
+    public static final String IMG_POWERUP_BIG_STRING = "images/Big.png";
 
     // Music
     public static final String SND_TITLE = "audio/title.wav";
@@ -50,9 +52,8 @@ public class Global {
     // Audio
     public static final String SND_SHOT = "audio/shot.wav";
     public static final String SND_EXPL = "audio/explosion.wav";
+    public static final String SND_POWERUP = "audio/power.wav";
     public static final String[] SND_LZR = {
-        "audio/lazer1.wav",
-        "audio/lazer2.wav",
         "audio/lazer1.wav",
         "audio/lazer2.wav"
     };

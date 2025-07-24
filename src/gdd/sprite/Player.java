@@ -11,6 +11,7 @@ public class Player extends Sprite {
     private static final int START_Y = 540;
     private int width;
     private int currentSpeed = 2;
+    private int shot_type = 1;
 
     private final Rectangle bounds = new Rectangle(175,135,17,32);
 
@@ -65,6 +66,14 @@ public class Player extends Sprite {
         if (key == KeyEvent.VK_RIGHT) {
             dx = 0;
         }
+    }
+
+    public void setShot(int number){
+        this.shot_type = number;
+    }
+
+    public int getShot(){
+        return shot_type;
     }
 
     @Override
