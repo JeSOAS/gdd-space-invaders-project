@@ -10,7 +10,7 @@ public class Player extends Sprite {
     private static final int START_X = 270;
     private static final int START_Y = 540;
     private int width;
-    private int currentSpeed = 2;
+    private int currentSpeed = 3;
     private int shot_type = 1;
 
     private final Rectangle bounds = new Rectangle(175,135,17,32);
@@ -37,8 +37,8 @@ public class Player extends Sprite {
     }
 
     public int setSpeed(int speed) {
-        if (speed < 1) {
-            speed = 1; // Ensure speed is at least 1
+        if (speed < 3) {
+            speed = 3; // Ensure speed is at least 2
         }
         this.currentSpeed = speed;
         return currentSpeed;

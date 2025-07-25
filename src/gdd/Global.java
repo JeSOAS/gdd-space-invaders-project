@@ -7,7 +7,11 @@ public class Global {
 
     public static final int player_direction = 0;
 
+    public static boolean mortal = true;
+
     public static final int SCALE_FACTOR = 3; // Scaling factor for sprites
+
+    public static final int FPS = 30; 
 
     public static final int BOARD_WIDTH = 716; // Doubled from 358
     public static final int BOARD_HEIGHT = 700; // Doubled from 350
@@ -41,7 +45,8 @@ public class Global {
     public static final String IMG_BOMB = "images/bomb.png";
     public static final String IMG_POWERUP_TRIPLE = "images/triple.png";
     public static final String IMG_UI = "images/powerUi.png";
-    public static final String IMG_POWERUP_BIG_STRING = "images/Big.png";
+    public static final String IMG_POWERUP_BIG = "images/Big.png";
+    public static final String IMG_POWERUP_BURST = "images/burst.png";
 
     // Music
     public static final String SND_TITLE = "audio/title.wav";
@@ -52,11 +57,10 @@ public class Global {
     // Audio
     public static final String SND_SHOT = "audio/shot.wav";
     public static final String SND_EXPL = "audio/explosion.wav";
-    public static final String SND_POWERUP = "audio/power.wav";
+    public static final String SND_POWERUP = "audio/powerUp.wav";
+    public static final String SND_SECRET = "audio/secret.wav";
     public static final String[] SND_LZR = {
         "audio/lazer1.wav",
         "audio/lazer2.wav"
     };
-
-    
 }

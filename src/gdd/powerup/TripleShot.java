@@ -6,6 +6,10 @@ import javax.swing.ImageIcon;
 
 public class TripleShot extends PowerUp {
 
+    public TripleShot(){
+        super();
+    }
+
     public TripleShot(int x, int y) {
         super(x, y);
         // Set image
@@ -16,7 +20,7 @@ public class TripleShot extends PowerUp {
 
     @Override
     public void act(int direction) {
-        this.y += 3; // Move down by 3 pixels each frame
+        this.y += 4; // Move down by 3 pixels each frame
     }
 
     
@@ -29,5 +33,9 @@ public class TripleShot extends PowerUp {
         this.die(); // Remove the power-up after use
     }
 
+    @Override
+    public void downgrade(Player player) {
+        player.setShot(1);
+    }
 
 }

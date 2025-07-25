@@ -3,13 +3,16 @@ package gdd;
 import java.awt.Image;
 
 public class ActivePowerUp {
-    public Image image;        // power-up icon
-    public int duration = 300; // total duration (frames)
-    public int remaining;      // countdown timer
+    public Image image;
+    public int remaining;
+    public final int fullDuration;
+    public final Class<?> type;
 
-    public ActivePowerUp(Image image) {
+    public ActivePowerUp(Image image, int duration, Class<?> type) {
         this.image = image;
         this.remaining = duration;
+        this.fullDuration = duration;
+        this.type = type;
     }
 
     public void tick() {
@@ -21,6 +24,7 @@ public class ActivePowerUp {
     }
 
     public float getProgress() {
-        return (float) remaining / duration;
+        return (float) remaining / fullDuration;
     }
 }
+

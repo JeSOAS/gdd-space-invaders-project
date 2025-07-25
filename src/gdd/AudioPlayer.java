@@ -24,7 +24,7 @@ public class AudioPlayer {
     String filePath;
 
     // constructor to initialize streams and clip
-    public AudioPlayer(String filePath)
+    public AudioPlayer(String filePath, boolean Loop)
             throws UnsupportedAudioFileException,
             IOException, LineUnavailableException {
         // create AudioInputStream object
@@ -37,14 +37,16 @@ public class AudioPlayer {
 
         // open audioInputStream to the clip
         clip.open(audioInputStream);
-
-        clip.loop(Clip.LOOP_CONTINUOUSLY);
+        if (Loop){
+            clip.loop(Clip.LOOP_CONTINUOUSLY);
+        }
+        
     }
 
     public static void main(String[] args) {
         try {
-            String filePath = "src/audio/title.wav";
-            AudioPlayer audioPlayer = new AudioPlayer(filePath);
+            String filePath = "audio/title.wav";
+            AudioPlayer audioPlayer = new AudioPlayer(filePath, true);
 
             audioPlayer.play();
             Scanner sc = new Scanner(System.in);

@@ -39,8 +39,8 @@ public class ScoreManager {
     // Call this once per frame in your game loop
     public void update() {
         frameCounter++;
-        if (frameCounter >= 60) { // Assuming 60 FPS = 1 second
-            score += 10;
+        if (frameCounter >= 3) { // Assuming 60 FPS = 1 second
+            score += 1;
             frameCounter = 0;
         }
     }

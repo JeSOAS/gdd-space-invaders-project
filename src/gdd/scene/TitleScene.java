@@ -20,15 +20,19 @@ public class TitleScene extends JPanel {
 
     private int frame = 0;
     private Image image;
-    private AudioPlayer audioPlayer;
+    private AudioPlayer backgroundPlayer;
+    private AudioPlayer sfxPlayer;
     private final Dimension d = new Dimension(BOARD_WIDTH, BOARD_HEIGHT);
     private Timer timer;
     private final Game game;
+    private final String konami = "38384040373937396665";
+    private String code = "";
+    private boolean check = true;
+    
 
     public TitleScene(Game game) {
         this.game = game;
         initBoard();
-        initTitle();
     }
 
     private void initBoard() {
@@ -40,7 +44,7 @@ public class TitleScene extends JPanel {
         setFocusable(true);
         setBackground(Color.black);
 
-        timer = new Timer(1000 / 60, new GameCycle());
+        timer = new Timer(1000 / 30, new GameCycle());
         timer.start();
 
         initTitle();
@@ -53,8 +57,12 @@ public class TitleScene extends JPanel {
                 timer.stop();
             }
 
-            if (audioPlayer != null) {
-                audioPlayer.stop();
+            if (backgroundPlayer != null) {
+                backgroundPlayer.stop();
+            }
+
+            if (sfxPlayer != null) {
+                sfxPlayer.stop();
             }
         } catch (Exception e) {
             System.err.println("Error closing audio player.");
@@ -74,13 +82,22 @@ public class TitleScene extends JPanel {
 
     private void initAudio() {
         try {
-            audioPlayer = new AudioPlayer(SND_TITLE);
+            backgroundPlayer = new AudioPlayer(SND_TITLE, true);
 
-            audioPlayer.play();
+            backgroundPlayer.play();
         } catch (Exception e) {
             System.err.println("Error with playing sound.");
         }
 
+    }
+
+    private void secretAudio() {
+        try {
+            sfxPlayer = new AudioPlayer(SND_SECRET, false);
+            sfxPlayer.play();
+        } catch (Exception e) {
+            System.err.println("Error initializing audio player: " + e.getMessage());
+        }
     }
 
     @Override
@@ -112,13 +129,13 @@ public class TitleScene extends JPanel {
 
         g.setColor(Color.gray);
         g.setFont(g.getFont().deriveFont(10f));
-        g.drawString("Game by Aleksandr Romanov", 10, 650);
+        g.drawString("Game by Aleksandr Romanov(6530338)", 10, 650);
 
         Toolkit.getDefaultToolkit().sync();
     }
 
     private void update() {
-        frame++;
+        frame++; 
     }
 
     private void doGameCycle() {
@@ -143,10 +160,23 @@ public class TitleScene extends JPanel {
 
         @Override
         public void keyPressed(KeyEvent e) {
-            System.out.println("Title.keyPressed: " + e.getKeyCode());
+            //System.out.println("Title.keyPressed: " + e.getKeyCode());
+            code += e.getKeyCode();
+            if(check){
+                if(code.length()>=19){
+                    if (code.substring(0,20).equals(konami)) {
+                        mortal = false;
+                        check = false;
+                        secretAudio();
+                    }
+                if(code.length()>20){
+                    code = code.substring(code.length()-20, code.length());
+                }
+                }
+            }
             int key = e.getKeyCode();
             if (key == KeyEvent.VK_SPACE) {
-                game.loadScene1();
+                game.loadScene3();
             }
 
         }
