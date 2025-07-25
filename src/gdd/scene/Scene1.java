@@ -51,6 +51,12 @@ public class Scene1 extends JPanel {
     private static final int SHOT_COOLDOWN_MS = 300;
     private long lastShotTime = 0;
     private boolean isPaused = false;
+    private boolean ShowMessage = false;
+    private boolean finalwaveSpawned = false;
+    private int playerDX = 0;
+    private int bgOffsetX = 0; // background horizontal offset
+    private final int SCROLL_SPEED = 1; // pixels per frame
+
 
 
     final int BLOCKHEIGHT = 50;
@@ -175,7 +181,6 @@ public class Scene1 extends JPanel {
     }
 
     private void loadSpawnDetails() {
-        addSpawn(10, new SpawnDetails("PowerUp-Burst", randomizer.nextInt(100, 300), 0));
         addSpawn(200, new SpawnDetails("Alien1", randomizer.nextInt(100, 300), 0));
         addSpawn(300, new SpawnDetails("Alien1", randomizer.nextInt(200, 400), 0));
 
@@ -246,38 +251,31 @@ public class Scene1 extends JPanel {
     }
 
     private void drawMap(Graphics g) {
-    // Calculate smooth scrolling offset (1 pixel per frame)
-    int scrollOffset = (frame) % BLOCKHEIGHT;
+        int scrollSpeedY = 2;
+        int scrollOffsetY = (frame * scrollSpeedY) % BLOCKHEIGHT;
+        int baseRow = (frame * scrollSpeedY) / BLOCKHEIGHT;
+        int rowsNeeded = (BOARD_HEIGHT / BLOCKHEIGHT) + 3;
 
-    // Calculate which rows to draw based on screen position
-    int baseRow = (frame) / BLOCKHEIGHT;
-    int rowsNeeded = (BOARD_HEIGHT / BLOCKHEIGHT) + 3; // +3 for smooth scrolling
+        for (int screenRow = 0; screenRow < rowsNeeded; screenRow++) {
+            int mapRow = (baseRow + screenRow) % MAP.length;
+            int y = (screenRow * BLOCKHEIGHT) - scrollOffsetY;
 
-    // Loop through rows that should be visible on screen
-    for (int screenRow = 0; screenRow < rowsNeeded; screenRow++) {
-        // Calculate which MAP row to use (with wrapping)
-        int mapRow = (baseRow + screenRow) % MAP.length;
+            if (y > BOARD_HEIGHT || y < -BLOCKHEIGHT) continue;
 
-        // Calculate Y position for this row
-        int y = (screenRow * BLOCKHEIGHT) - scrollOffset;
+            for (int col = 0; col < MAP[mapRow].length; col++) {
+                if (MAP[mapRow][col] == 1) {
+                    // Apply bgOffsetX (parallax) here
+                    int x = (col * BLOCKWIDTH) + bgOffsetX;
 
-        // Skip if row is completely off-screen
-        if (y > BOARD_HEIGHT || y < -BLOCKHEIGHT) {
-            continue;
-        }
+                    // Optional: wrap horizontally to keep it looping forever
+                    int wrappedX = ((x % BOARD_WIDTH) + BOARD_WIDTH) % BOARD_WIDTH;
 
-        // Draw each column in this row
-        for (int col = 0; col < MAP[mapRow].length; col++) {
-            if (MAP[mapRow][col] == 1) {
-                // Calculate X position
-                int x = col * BLOCKWIDTH;
-
-                // Draw a cluster of stars
-                drawStarCluster(g, x, y, BLOCKWIDTH, BLOCKHEIGHT);
+                    drawStarCluster(g, wrappedX, y, BLOCKWIDTH, BLOCKHEIGHT);
+                }
             }
         }
     }
-}
+
 
 
 
@@ -449,6 +447,10 @@ public class Scene1 extends JPanel {
             drawBombing(g);
             drawUI(g);
 
+            if(ShowMessage){
+                Incoming(g);
+            }
+
             if (isPaused) {
                 drawPauseMenu(g);
             }
@@ -513,6 +515,24 @@ public class Scene1 extends JPanel {
                 BOARD_WIDTH / 2 + 15);
     }
 
+
+
+    private void Incoming(Graphics g) {
+    g.setColor(new Color(20, 20, 30));
+    g.fillRoundRect(100, BOARD_HEIGHT / 2 - 20, BOARD_WIDTH - 200, 40, 15, 15);
+
+    g.setColor(new Color(0, 200, 255));
+    g.drawRoundRect(100, BOARD_HEIGHT / 2 - 20, BOARD_WIDTH - 200, 40, 15, 15);
+
+    Font messageFont = new Font("Arial", Font.BOLD, 16);
+    FontMetrics fm = this.getFontMetrics(messageFont);
+    String msg = "Big wave approaching!";
+
+    g.setFont(messageFont);
+    g.setColor(new Color(180, 255, 255));
+    g.drawString(msg, (BOARD_WIDTH - fm.stringWidth(msg)) / 2, BOARD_HEIGHT / 2 + 6);
+}
+
     private void update() {
         ScoreManager.getInstance().update();
         // Check enemy spawn
@@ -521,6 +541,10 @@ public class Scene1 extends JPanel {
             for (SpawnDetails sd : sds) {
                 // Create a new enemy based on the spawn details
                 switch (sd.type) {
+                    case "Enemy" -> {
+                        Enemy enemy = new Enemy(sd.x, sd.y, true);
+                        enemies.add(enemy);
+                    }
                     case "Alien1" -> {
                         Enemy enemy = new Alien1(sd.x, sd.y, false);
                         enemies.add(enemy);
@@ -583,15 +607,40 @@ public class Scene1 extends JPanel {
         }
 
 
-        if (deaths == 32) {
+        if (deaths == 52) {
             inGame = false;
             timer.stop();
             ScoreManager.getInstance().addLevelCompletion();
             game.loadScene2();
         }
 
+        //Message Showing
+        if (deaths == 32 && !ShowMessage && !finalwaveSpawned) {
+            ShowMessage = true;
+            finalwaveSpawned = true;
+
+            new javax.swing.Timer(1500, e -> {
+                ShowMessage = false;
+                repaint();
+            }).start();
+
+            int waveX = randomizer.nextInt(100, 300);
+            int baseSpawnFrame = frame + 90; // Start delay (~1 second if 30 FPS)
+
+            for (int j = 0; j < 4; j++) {
+                int spawnAtFrame = baseSpawnFrame + j * 250; // Space 250 frames apart
+
+                for (int i = 0; i < 5; i++) {
+                    addSpawn(spawnAtFrame, new SpawnDetails("Enemy", waveX + (ALIEN_WIDTH + ALIEN_GAP) * i, 0));
+                }
+            }
+        }
+
+
         //Player
         player.act(0);
+        playerDX = player.getDx();
+        System.out.println(playerDX);
 
         //Power-ups
         for (PowerUp powerup : powerups) {
@@ -761,7 +810,7 @@ public class Scene1 extends JPanel {
         
         for (Enemy enemy : enemies) {
             if (frame > 50){
-                int chance = randomizer.nextInt(15);
+                int chance = randomizer.nextInt(1000);
                 Enemy.Bomb bomb = enemy.getBomb();
 
                 if (chance == CHANCE && enemy.isVisible() && bomb.isDestroyed()) {

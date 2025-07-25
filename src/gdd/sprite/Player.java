@@ -12,6 +12,7 @@ public class Player extends Sprite {
     private int width;
     private int currentSpeed = 3;
     private int shot_type = 1;
+    private int dx = 0;
 
     private final Rectangle bounds = new Rectangle(175,135,17,32);
 
@@ -38,7 +39,7 @@ public class Player extends Sprite {
 
     public int setSpeed(int speed) {
         if (speed < 3) {
-            speed = 3; // Ensure speed is at least 2
+            speed = 3; // Ensure speed is at least 3
         }
         this.currentSpeed = speed;
         return currentSpeed;
@@ -68,6 +69,10 @@ public class Player extends Sprite {
         }
     }
 
+    public int getDx(){
+        return dx;
+    }
+
     public void setShot(int number){
         this.shot_type = number;
     }
@@ -80,8 +85,8 @@ public class Player extends Sprite {
     public void act(int direction) {
         x += dx;
 
-        if (x <= 2) {
-            x = 2;
+        if (x <= 3) {
+            x = 3;
         }
 
         if (x >= BOARD_WIDTH - 2 * width) {
