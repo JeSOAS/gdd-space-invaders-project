@@ -12,7 +12,7 @@ public class Scene2 extends JPanel implements ActionListener {
     private AudioPlayer backgroundPlayer;
     private Timer timer;
     private int elapsedTime = 0; 
-    private final int waitTime = 6000; 
+    private final int waitTime = 9000; 
 
     private String message = "Level 1 Complete!";
 
@@ -90,7 +90,7 @@ public class Scene2 extends JPanel implements ActionListener {
 public void actionPerformed(ActionEvent e) {
     elapsedTime += 100;
 
-    if (elapsedTime >= 3000 && message.equals("Level 1 Complete!")) {
+    if (elapsedTime >= 6000 && message.equals("Level 1 Complete!")) {
         message = "Level 2";
     }
 

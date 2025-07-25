@@ -20,6 +20,8 @@ public class TitleScene extends JPanel {
 
     private int frame = 0;
     private Image image;
+    private Image image2;
+    private Image image3;
     private AudioPlayer backgroundPlayer;
     private AudioPlayer sfxPlayer;
     private final Dimension d = new Dimension(BOARD_WIDTH, BOARD_HEIGHT);
@@ -72,11 +74,18 @@ public class TitleScene extends JPanel {
     private void initTitle() {
 
         var url = getClass().getResource(IMG_TITLE);
+        var url2 = getClass().getResource(IMG_KEYS);
+        var url3 = getClass().getResource(IMG_SPACE);
+        
             if (url == null) {
                 System.err.println("Could not load image: " + IMG_TITLE);
             } else {
                 var ii = new ImageIcon(url);
+                var ii2 = new ImageIcon(url2);
+                var ii3 = new ImageIcon(url3);
                 image = ii.getImage();
+                image2 = ii2.getImage();
+                image3 = ii3.getImage();
             }
     }
 
@@ -114,6 +123,9 @@ public class TitleScene extends JPanel {
         g.fillRect(0, 0, d.width, d.height);
 
         g.drawImage(image, 0, -80, d.width, d.height, this);
+        g.drawImage(image2, BOARD_WIDTH / 4 + 252, 500, 128, 119, this);
+        g.drawImage(image3, BOARD_WIDTH / 4 - 30, 550, 252, 52, this);
+        
 
         if (frame % 60 < 30) {
             g.setColor(Color.red);
@@ -125,10 +137,10 @@ public class TitleScene extends JPanel {
         String text = "Press SPACE to Start";
         int stringWidth = g.getFontMetrics().stringWidth(text);
         int x = (d.width - stringWidth) / 2;
-        g.drawString(text, x, 600);
+        g.drawString(text, x, 480);
 
         g.setColor(Color.gray);
-        g.setFont(g.getFont().deriveFont(10f));
+        g.setFont(g.getFont().deriveFont(12f));
         g.drawString("Game by Aleksandr Romanov(6530338)", 10, 650);
 
         Toolkit.getDefaultToolkit().sync();

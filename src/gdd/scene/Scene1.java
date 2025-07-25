@@ -55,7 +55,6 @@ public class Scene1 extends JPanel {
     private boolean finalwaveSpawned = false;
     private int playerDX = 0;
     private int bgOffsetX = 0; // background horizontal offset
-    private final int SCROLL_SPEED = 1; // pixels per frame
 
 
 
@@ -76,15 +75,6 @@ public class Scene1 extends JPanel {
     private boolean spawnedAt15 = false;
     private boolean spawnedAt20 = false;
 
-
-    private int pwr_time1 = 450;
-    private int pwr_time2 = 200;
-    private int pwr_time3 = 150;
-    private int pwr_time4 = 300;
-    private int pwr_end1;
-    private int pwr_end2;
-    private int pwr_end3;
-    private int pwr_end4;
 
     private Timer timer;
     private final Game game;
@@ -264,10 +254,8 @@ public class Scene1 extends JPanel {
 
             for (int col = 0; col < MAP[mapRow].length; col++) {
                 if (MAP[mapRow][col] == 1) {
-                    // Apply bgOffsetX (parallax) here
                     int x = (col * BLOCKWIDTH) + bgOffsetX;
 
-                    // Optional: wrap horizontally to keep it looping forever
                     int wrappedX = ((x % BOARD_WIDTH) + BOARD_WIDTH) % BOARD_WIDTH;
 
                     drawStarCluster(g, wrappedX, y, BLOCKWIDTH, BLOCKHEIGHT);
@@ -337,7 +325,7 @@ public class Scene1 extends JPanel {
     private void drawPlayer(Graphics g) {
 
         if (player.isVisible()) {
-            g.drawImage(player.getImage(), player.getX(), player.getY(), this);
+            g.drawImage(player.getCurrentImage(), player.getX(), player.getY(), this);
         }
 
         if (player.isDying()) {
@@ -607,7 +595,7 @@ public class Scene1 extends JPanel {
         }
 
 
-        if (deaths == 52) {
+        if (deaths == 62) {
             inGame = false;
             timer.stop();
             ScoreManager.getInstance().addLevelCompletion();
@@ -618,20 +606,20 @@ public class Scene1 extends JPanel {
         if (deaths == 32 && !ShowMessage && !finalwaveSpawned) {
             ShowMessage = true;
             finalwaveSpawned = true;
+            int waveX = randomizer.nextInt(100, 300);
+            int baseSpawnFrame = frame + 90; // Start delay (~3 second if 30 FPS)
+            addSpawn(frame + 10, new SpawnDetails("PowerUp-TripleShot", waveX, 0));
 
             new javax.swing.Timer(1500, e -> {
                 ShowMessage = false;
                 repaint();
             }).start();
 
-            int waveX = randomizer.nextInt(100, 300);
-            int baseSpawnFrame = frame + 90; // Start delay (~1 second if 30 FPS)
-
-            for (int j = 0; j < 4; j++) {
-                int spawnAtFrame = baseSpawnFrame + j * 250; // Space 250 frames apart
+            for (int j = 0; j < 6; j++) {
+                int spawnAtFrame = baseSpawnFrame + j * 160; // Space 120 frames apart
 
                 for (int i = 0; i < 5; i++) {
-                    addSpawn(spawnAtFrame, new SpawnDetails("Enemy", waveX + (ALIEN_WIDTH + ALIEN_GAP) * i, 0));
+                    addSpawn(spawnAtFrame, new SpawnDetails("Enemy", waveX + (ALIEN_WIDTH + ALIEN_GAP) * i, 30));
                 }
             }
         }
@@ -640,63 +628,39 @@ public class Scene1 extends JPanel {
         //Player
         player.act(0);
         playerDX = player.getDx();
-        System.out.println(playerDX);
+
+        //BG-Scrolling based on input
+        bgOffsetX -= playerDX / 3;
 
         //Power-ups
         for (PowerUp powerup : powerups) {
-            if(powerup.isVisible()){
-                    powerup.act(0);
-                }
-            if (powerup.collidesWith(player)){
+            if (powerup.isVisible()) {
+                powerup.act(0);
+            }
+
+            if (powerup.collidesWith(player)) {
                 powerupAudio();
                 powerup.upgrade(player);
                 ScoreManager.getInstance().addPowerUp();
-                if (powerup instanceof SpeedUp) {
-                        Class<? extends PowerUp> type = SpeedUp.class;
-                        if (!powerUpEndFrames.containsKey(type) || frame >= powerUpEndFrames.get(type)) {
-                            powerUpEndFrames.put(type, frame + pwr_time1);
-                            pwr_end1 = frame + pwr_time1;
 
-                            if (!hasPowerUpIcon(type)) {
-                                Image powerUpIcon = new ImageIcon(IMG_POWERUP_SPEEDUP).getImage();
-                                activePowerUps.add(new ActivePowerUp(powerUpIcon, pwr_time1, type));
-                            }
-                        }
-                    } else if (powerup instanceof TripleShot) {
-                        Class<? extends PowerUp> type = TripleShot.class;
-                        if (!powerUpEndFrames.containsKey(type) || frame >= powerUpEndFrames.get(type)) {
-                            powerUpEndFrames.put(type, frame + pwr_time2);
-                            pwr_end2 = frame + pwr_time2;
+                Class<? extends PowerUp> type = powerup.getClass();
+                int duration = getDurationForPowerUp(type);
+                Image icon = getIconForPowerUp(type);
 
-                            if (!hasPowerUpIcon(type)) {
-                                Image powerUpIcon = new ImageIcon(IMG_POWERUP_TRIPLE).getImage();
-                                activePowerUps.add(new ActivePowerUp(powerUpIcon, pwr_time2, type));
-                            }
-                        }
-                    } else if (powerup instanceof BIGShot) {
-                        Class<? extends PowerUp> type = BIGShot.class;
-                        if (!powerUpEndFrames.containsKey(type) || frame >= powerUpEndFrames.get(type)) {
-                            powerUpEndFrames.put(type, frame + pwr_time3);
-                            pwr_end3 = frame + pwr_time3;
-
-                            if (!hasPowerUpIcon(type)) {
-                                Image powerUpIcon = new ImageIcon(IMG_POWERUP_BIG).getImage();
-                                activePowerUps.add(new ActivePowerUp(powerUpIcon, pwr_time3, type));
-                            }
-                        }
-                    }else if (powerup instanceof BurstShot) {
-                        Class<? extends PowerUp> type = BurstShot.class;
-                        if (!powerUpEndFrames.containsKey(type) || frame >= powerUpEndFrames.get(type)) {
-                            powerUpEndFrames.put(type, frame + pwr_time4);
-                            pwr_end3 = frame + pwr_time4;
-
-                            if (!hasPowerUpIcon(type)) {
-                                Image powerUpIcon = new ImageIcon(IMG_POWERUP_BURST).getImage();
-                                activePowerUps.add(new ActivePowerUp(powerUpIcon, pwr_time4, type));
-                            }
-                        }
+                boolean found = false;
+                for (ActivePowerUp ap : activePowerUps) {
+                    if (ap.type == type) {
+                        ap.reset(duration);
+                        found = true;
+                        break;
                     }
-                    powerup.die();
+                }
+
+                if (!found) {
+                    activePowerUps.add(new ActivePowerUp(icon, duration, type));
+                }
+
+                powerup.die();
             }
         }
 
@@ -704,22 +668,14 @@ public class Scene1 extends JPanel {
         Iterator<ActivePowerUp> iterator = activePowerUps.iterator();
         while (iterator.hasNext()) {
             ActivePowerUp ap = iterator.next();
-            ap.tick();
-            if (ap.isExpired()) {
+            if (ap.update()) {
                 iterator.remove();
-
-                //downgrade
-                if (ap.type == SpeedUp.class) {
-                    new SpeedUp().downgrade(player);
-                } else if (ap.type == TripleShot.class) {
-                    new TripleShot().downgrade(player);
-                } else if (ap.type == BIGShot.class) {
-                    new BIGShot().downgrade(player);
-                } else if (ap.type == BurstShot.class) {
-                    new BurstShot().downgrade(player);
-                }
+                downgradePlayer(ap.type);
             }
         }
+
+
+        
 
 
         //Enemies
@@ -742,8 +698,8 @@ public class Scene1 extends JPanel {
                     // Collision detection: shot and enemy
                     int enemyX = enemy.getX();
                     int enemyY = enemy.getY();
-
-                    if (enemy.isVisible() && shot.isVisible()
+                    if (player.getShot() != 3) {
+                        if (enemy.isVisible() && shot.isVisible()
                             && shotX >= (enemyX)
                             && shotX <= (enemyX + ALIEN_WIDTH)
                             && shotY >= (enemyY)
@@ -754,11 +710,24 @@ public class Scene1 extends JPanel {
                         ScoreManager.getInstance().addEnemyKill();
                         explosions.add(new Explosion(enemyX, enemyY));
                         deaths++;
-                        if (player.getShot() != 3){
-                            shot.die();
-                            shotsToRemove.add(shot);
-                        }
+                        shot.die();
+                        shotsToRemove.add(shot);
+
                         
+                    }
+                    }else{
+                        if (enemy.isVisible() && shot.isVisible()
+                            && shotX >= (enemyX-5)
+                            && shotX <= (enemyX + ALIEN_WIDTH+5)
+                            && shotY >= (enemyY-5)
+                            && shotY <= (enemyY + ALIEN_HEIGHT+5)) {
+
+                        explAudio();
+                        enemy.setDying(true);
+                        ScoreManager.getInstance().addEnemyKill();
+                        explosions.add(new Explosion(enemyX, enemyY));
+                        deaths++;           
+                    }
                     }
                 }
 
@@ -809,8 +778,8 @@ public class Scene1 extends JPanel {
          //Bomb is with enemy, so it loops over enemies
         
         for (Enemy enemy : enemies) {
-            if (frame > 50){
-                int chance = randomizer.nextInt(1000);
+            if (frame > 25){
+                int chance = randomizer.nextInt(100);
                 Enemy.Bomb bomb = enemy.getBomb();
 
                 if (chance == CHANCE && enemy.isVisible() && bomb.isDestroyed()) {
@@ -847,13 +816,28 @@ public class Scene1 extends JPanel {
         }
     }
 
-    private boolean hasPowerUpIcon(Class<?> type) {
-        for (ActivePowerUp ap : activePowerUps) {
-            if (ap.type == type) return true;
-        }
-        return false;
+    private int getDurationForPowerUp(Class<? extends PowerUp> type) {
+        if (type == SpeedUp.class) return 450;
+        if (type == TripleShot.class) return 200;
+        if (type == BIGShot.class) return 150;
+        if (type == BurstShot.class) return 250;
+        return 200; 
     }
 
+    private Image getIconForPowerUp(Class<? extends PowerUp> type) {
+        if (type == SpeedUp.class) return new ImageIcon(IMG_POWERUP_SPEEDUP).getImage();
+        if (type == TripleShot.class) return new ImageIcon(IMG_POWERUP_TRIPLE).getImage();
+        if (type == BIGShot.class) return new ImageIcon(IMG_POWERUP_BIG).getImage();
+        if (type == BurstShot.class) return new ImageIcon(IMG_POWERUP_BURST).getImage();
+        return null; 
+    }
+
+    private void downgradePlayer(Class<?> type) {
+        if (type == SpeedUp.class) new SpeedUp().downgrade(player);
+        else if (type == TripleShot.class) new TripleShot().downgrade(player);
+        else if (type == BIGShot.class) new BIGShot().downgrade(player);
+        else if (type == BurstShot.class) new BurstShot().downgrade(player);
+    }
 
     private void doGameCycle() {
         if(isPaused){
@@ -925,7 +909,7 @@ public class Scene1 extends JPanel {
                             if (now - lastShotTime > SHOT_COOLDOWN_MS + 200) {
                                 final int[] burstCount = {0}; // shot counter
 
-                                Timer[] burstTimer = new Timer[1]; // array to hold Timer reference
+                                Timer[] burstTimer = new Timer[1];
                                 burstTimer[0] = new Timer(50, null);
 
                                 burstTimer[0].addActionListener(v -> {
@@ -934,7 +918,7 @@ public class Scene1 extends JPanel {
                                     burstCount[0]++;
 
                                     if (burstCount[0] >= 4) {
-                                        burstTimer[0].stop(); // stop safely
+                                        burstTimer[0].stop();
                                     }
                                 });
 

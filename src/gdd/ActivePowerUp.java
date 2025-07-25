@@ -15,16 +15,18 @@ public class ActivePowerUp {
         this.type = type;
     }
 
-    public void tick() {
-        if (remaining > 0) remaining--;
-    }
-
-    public boolean isExpired() {
-        return remaining <= 0;
+    public void reset(int duration) {
+        this.remaining = duration;
     }
 
     public float getProgress() {
         return (float) remaining / fullDuration;
     }
+
+    public boolean update() {
+        if (remaining > 0) remaining--;
+        return remaining <= 0;
+    }
 }
+
 

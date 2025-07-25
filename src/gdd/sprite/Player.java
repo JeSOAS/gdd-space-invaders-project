@@ -1,8 +1,10 @@
 package gdd.sprite;
 
 import static gdd.Global.*;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.util.List;
 import javax.swing.ImageIcon;
 
 public class Player extends Sprite {
@@ -14,20 +16,22 @@ public class Player extends Sprite {
     private int shot_type = 1;
     private int dx = 0;
 
-    private final Rectangle bounds = new Rectangle(175,135,17,32);
+    private final List<Rectangle> IDLE = List.of(
+        new Rectangle(152, 8, 16, 32),
+        new Rectangle(176, 8, 16, 32)
+    );
+
+
+
+    //private final Rectangle bounds = new Rectangle(175,135,17,32);
 
     public Player() {
         initPlayer();
     }
 
     private void initPlayer() {
-        var ii = new ImageIcon(IMG_PLAYER);
-
-        // Scale the image to use the global scaling factor
-        var scaledImage = ii.getImage().getScaledInstance(ii.getIconWidth() * SCALE_FACTOR,
-                ii.getIconHeight() * SCALE_FACTOR,
-                java.awt.Image.SCALE_SMOOTH);
-        setImage(scaledImage);
+        Image sheet = new ImageIcon(IMG_SPRITES).getImage();
+        loadFrames(sheet, IDLE, 2);
 
         setX(START_X);
         setY(START_Y);
@@ -83,6 +87,7 @@ public class Player extends Sprite {
 
     @Override
     public void act(int direction) {
+        updateAnimation();
         x += dx;
 
         if (x <= 3) {

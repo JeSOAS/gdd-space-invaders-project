@@ -7,6 +7,7 @@ public class ScoreManager {
     private int score;
     private int frameCounter;
 
+    @SuppressWarnings("OverridableMethodCallInConstructor")
     private ScoreManager() {
         reset();
     }
@@ -25,7 +26,7 @@ public class ScoreManager {
     }
 
     public void addEnemyKill() {
-        score += 100;
+        score += 50;
     }
 
     public void addPowerUp() {
@@ -33,7 +34,7 @@ public class ScoreManager {
     }
 
     public void addLevelCompletion() {
-        score += 1000;
+        score += 500;
     }
 
     // Call this once per frame in your game loop

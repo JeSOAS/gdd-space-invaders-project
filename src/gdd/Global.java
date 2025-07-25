@@ -22,10 +22,10 @@ public class Global {
     public static final int BOMB_HEIGHT = 10; // Doubled from 5
 
     public static final int ALIEN_HEIGHT = 24; // Doubled from 12
-    public static final int ALIEN_WIDTH = 24; // Doubled from 12
+    public static final int ALIEN_WIDTH = 40; // Doubled from 12
     public static final int ALIEN_INIT_X = 300; // Doubled from 150
     public static final int ALIEN_INIT_Y = 10; // Doubled from 5
-    public static final int ALIEN_GAP = 30; // Gap between aliens
+    public static final int ALIEN_GAP = 12; // Gap between aliens
 
     public static final int GO_DOWN = 30; // Doubled from 15
     public static final int CHANCE = 1;
@@ -34,15 +34,20 @@ public class Global {
     public static final int PLAYER_HEIGHT = 20; // Doubled from 10
 
     // Images
+    public static final String IMG_TITLE = "/images/title.png";
+    public static final String IMG_KEYS = "/images/keys.png";
+    public static final String IMG_SPACE = "/images/space.png";
+    public static final String IMG_SPRITES = "images/sprites.png";
+
     public static final String IMG_ENEMY = "images/alien.png";
     public static final String IMG_ALIEN1 = "images/alien1.png";
     public static final String IMG_PLAYER = "images/player.png";
     public static final String IMG_SHOT = "images/shot.png";
+    public static final String IMG_BOMB = "images/bomb.png";
+
     public static final String IMG_EXPLOSION = "images/explosion.png";
     public static final String IMG_EXPLOSION2 = "images/explosion2.png";
-    public static final String IMG_TITLE = "/images/title.png";
     public static final String IMG_POWERUP_SPEEDUP = "images/powerup-s.png";
-    public static final String IMG_BOMB = "images/bomb.png";
     public static final String IMG_POWERUP_TRIPLE = "images/triple.png";
     public static final String IMG_UI = "images/powerUi.png";
     public static final String IMG_POWERUP_BIG = "images/Big.png";
