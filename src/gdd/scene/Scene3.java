@@ -78,22 +78,22 @@ public class Scene3 extends JPanel {
 
 
     private int direction = -1;
-    private int deaths = 0;
+    private int deaths = 141;
 
     private boolean inGame = true;
     private String message = "";
 
     private final Dimension d = new Dimension(BOARD_WIDTH, BOARD_HEIGHT);
     private final Random randomizer = new Random();
-    private boolean wave1 = false;
-    private boolean wave2 = false;
-    private boolean wave3 = false;
-    private boolean wave4 = false;
-    private boolean wave5 = false;
-    private boolean wave6 = false;
-    private boolean wave7 = false;
-    private boolean wave8 = false;
-    private boolean wave9 = false;
+    private boolean wave1 = true;
+    private boolean wave2 = true;
+    private boolean wave3 = true;
+    private boolean wave4 = true;
+    private boolean wave5 = true;
+    private boolean wave6 = true;
+    private boolean wave7 = true;
+    private boolean wave8 = true;
+    private boolean wave9 = true;
     private boolean wave10 = false;
     private boolean waveFinal = false;
     private boolean BossWave = false;
@@ -159,7 +159,7 @@ public class Scene3 extends JPanel {
 
     private void loseAudio() {
         try {
-            backgroundPlayer = new AudioPlayer(SND_LOSE, true);
+            backgroundPlayer = new AudioPlayer(SND_LOSE, false);
             backgroundPlayer.play();
         } catch (Exception e) {
             System.err.println("Error initializing audio player: " + e.getMessage());
@@ -1034,9 +1034,6 @@ public class Scene3 extends JPanel {
                     if (backgroundPlayer != null) {
                         backgroundPlayer.stop();
                     }
-                    if (sfxPlayer != null) {
-                        sfxPlayer.stop();
-                    }
                 } catch (Exception v) {
                     System.err.println("Error closing audio player.");
                 }
@@ -1061,7 +1058,7 @@ public class Scene3 extends JPanel {
         //End game
         if(deaths >= 259){
             lose = false;
-            message = "Congratulations, you save Earth!";
+            message = "Congratulations, you saved Earth!";
             inGame = false;
             timer.stop();
             ScoreManager.getInstance().addLevelCompletion();
