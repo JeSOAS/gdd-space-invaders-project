@@ -1,5 +1,5 @@
 # GDD Space Invaders Project
-#Made by JeSAOS
+#Made by Aleksandr Romanov a.k.a. Jesoas
 
 ## References
 This project is based from this 
