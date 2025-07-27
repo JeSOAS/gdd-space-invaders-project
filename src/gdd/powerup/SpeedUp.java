@@ -14,7 +14,6 @@ public class SpeedUp extends PowerUp {
 
     public SpeedUp(int x, int y) {
         super(x, y);
-        // Set image
         ImageIcon ii = new ImageIcon(IMG_POWERUP_SPEEDUP);
         var scaledImage = ii.getImage().getScaledInstance(ii.getIconWidth(), ii.getIconHeight(), java.awt.Image.SCALE_SMOOTH);
         setImage(scaledImage);
@@ -22,15 +21,14 @@ public class SpeedUp extends PowerUp {
 
     @Override
     public void act(int direction) {
-        this.y += 4; // Move down by 3 pixels each frame
+        this.y += 4;
     }
 
     
     @Override
     public void upgrade(Player player) {
-        // Upgrade the player with speed boost
-        player.setSpeed(player.getSpeed() + boostAmount); // Increase speed
-        this.die(); // Remove the power-up from screen
+        player.setSpeed(player.getSpeed() + boostAmount); //Increase speed
+        this.die(); 
     }
 
     @Override

@@ -16,7 +16,7 @@ public class Scene0 extends JPanel implements ActionListener {
 
     private String message = "Level 1";
 
-    private Game game; // reference to main game to switch scenes
+    private Game game;
 
     public Scene0(Game game) {
         this.game = game;

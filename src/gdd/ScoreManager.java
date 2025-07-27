@@ -37,10 +37,13 @@ public class ScoreManager {
         score += 500;
     }
 
-    // Call this once per frame in your game loop
+    public void addBossKill() {
+        score += 3000;
+    }
+
     public void update() {
         frameCounter++;
-        if (frameCounter >= 3) { // Assuming 60 FPS = 1 second
+        if (frameCounter >= 3) {
             score += 1;
             frameCounter = 0;
         }

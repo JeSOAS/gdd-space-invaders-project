@@ -172,7 +172,6 @@ public class TitleScene extends JPanel {
 
         @Override
         public void keyPressed(KeyEvent e) {
-            //System.out.println("Title.keyPressed: " + e.getKeyCode());
             code += e.getKeyCode();
             if(check){
                 if(code.length()>=19){

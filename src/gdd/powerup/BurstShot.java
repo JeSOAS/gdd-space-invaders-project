@@ -12,7 +12,6 @@ public class BurstShot extends PowerUp {
 
     public BurstShot(int x, int y) {
         super(x, y);
-        // Set image
         ImageIcon ii = new ImageIcon(IMG_POWERUP_BURST);
         var scaledImage = ii.getImage().getScaledInstance(ii.getIconWidth(), ii.getIconHeight(), java.awt.Image.SCALE_SMOOTH);
         setImage(scaledImage);
@@ -20,17 +19,16 @@ public class BurstShot extends PowerUp {
 
     @Override
     public void act(int direction) {
-        this.y += 4; // Move down by 3 pixels each frame
+        this.y += 4;
     }
 
     
     @Override
     public void upgrade(Player player) {
-        // Upgrade the shots to burst of 4
         if (player.getShot() != 4){
             player.setShot(4); 
         }
-        this.die(); // Remove the power-up after use
+        this.die(); //Remove the power-up after use
     }
 
     @Override

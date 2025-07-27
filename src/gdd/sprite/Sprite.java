@@ -74,7 +74,6 @@ abstract public class Sprite {
         return image;
     }
 
-    // Use this in your game rendering logic
     public Image getCurrentImage() {
         return frames.isEmpty() ? image : frames.get(currentFrame);
     }
@@ -87,6 +86,10 @@ abstract public class Sprite {
     public void setY(int y) {
         this.y = y;
     }
+    
+    public void setDx(int dx) {
+        this.dx = dx;
+    }
 
     public int getY() {
         return y;
@@ -96,6 +99,18 @@ abstract public class Sprite {
         return x;
     }
 
+    public int getDx() {
+        return dx;
+    }
+
+    public int getWidth(){
+        return this.getCurrentImage().getWidth(null);
+    }
+
+    public int getHeight(){
+        return this.getCurrentImage().getHeight(null);
+    }
+    
     public void setDying(boolean dying) {
         this.dying = dying;
     }
@@ -112,7 +127,6 @@ abstract public class Sprite {
             if (animationCounter >= frameDelay) {
                 animationCounter = 0;
                 currentFrame = (currentFrame + 1) % frames.size();
-                System.out.println("Loaded image: " + currentFrame);
                 image = frames.get(currentFrame);
             }
     }
@@ -125,15 +139,21 @@ abstract public class Sprite {
 
     public void loadFrames(Image spriteSheet, List<Rectangle> frameRects, int scale) {
         frames.clear();
+        BufferedImage bufferedSheet = toBufferedImage(spriteSheet);
         for (Rectangle r : frameRects) {
-            BufferedImage buf = toBufferedImage(spriteSheet);
-            BufferedImage frame = buf.getSubimage(r.x, r.y, r.width, r.height);
-            Image scaled = frame.getScaledInstance(r.width * scale, r.height * scale, Image.SCALE_SMOOTH);
-            frames.add(scaled);
+            BufferedImage frame = bufferedSheet.getSubimage(r.x, r.y, r.width, r.height);
+
+            if (scale != 1) {
+                Image scaled = frame.getScaledInstance(r.width * scale, r.height * scale, Image.SCALE_SMOOTH);
+                frames.add(toBufferedImage(scaled));
+            } else {
+                frames.add(frame);
+            }
         }
         currentFrame = 0;
         animationCounter = 0;
     }
+
 
 
     // Helper to convert Image to BufferedImage
@@ -142,18 +162,23 @@ abstract public class Sprite {
             return (BufferedImage) img;
         }
 
-        // Use ImageIcon to get dimensions reliably
-        ImageIcon icon = new ImageIcon(img);
-        int width = icon.getIconWidth();
-        int height = icon.getIconHeight();
+        int width = img.getWidth(null);
+        int height = img.getHeight(null);
+
+        // Handle async loading problems
+        if (width == -1 || height == -1) {
+            ImageIcon icon = new ImageIcon(img);
+            width = icon.getIconWidth();
+            height = icon.getIconHeight();
+        }
 
         BufferedImage bimage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-
         Graphics2D g2d = bimage.createGraphics();
         g2d.drawImage(img, 0, 0, null);
         g2d.dispose();
 
         return bimage;
-    }
+}
+
 
 }

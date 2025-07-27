@@ -7,7 +7,7 @@ import gdd.sprite.Sprite;
 abstract public class PowerUp extends Sprite {
     
     PowerUp() {
-
+        
     }
 
     PowerUp(int x, int y) {

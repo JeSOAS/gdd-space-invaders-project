@@ -1,18 +1,14 @@
 package gdd.sprite;
 
 import static gdd.Global.*;
-import java.awt.Image;
 import javax.swing.ImageIcon;
 
 public class Alien1 extends Enemy {
 
     private Bomb bomb;
 
-    private static final Image ALIEN_IMG = new ImageIcon(IMG_ALIEN1).getImage();
-
     public Alien1(int x, int y) {
-        super(x, y); // Defaults to isMainWave = true
-        this.image = ALIEN_IMG;
+        super(x, y);
     }
 
     public Alien1(int x, int y, boolean isMainWave) {
@@ -21,6 +17,7 @@ public class Alien1 extends Enemy {
 
     @Override
     public void act(int direction) {
+        updateAnimation();
         this.y += 1;
     }
 

@@ -2,6 +2,8 @@ package gdd.sprite;
 
 import static gdd.Global.*;
 import java.awt.Image;
+import java.awt.Rectangle;
+import java.util.List;
 import javax.swing.ImageIcon;
 
 public class Enemy extends Sprite {
@@ -10,32 +12,22 @@ public class Enemy extends Sprite {
 
     private boolean isMainWave;
 
-    private static final Image ALIEN_IMG;
-
-    static {
-        ImageIcon ii = new ImageIcon(IMG_ENEMY);
-        Image raw = ii.getImage();
-
-        Image fullyLoadedImage = new ImageIcon(raw).getImage();
-        Image scaledImage = fullyLoadedImage.getScaledInstance(
-                ii.getIconWidth() * SCALE_FACTOR,
-                ii.getIconHeight() * SCALE_FACTOR,
-                Image.SCALE_SMOOTH
-        );
-
-        ALIEN_IMG = scaledImage;
-    }
+    private final List<Rectangle> IDLE = List.of(
+        new Rectangle(161, 45, 34, 39),
+        new Rectangle(195, 45, 34, 39),
+        new Rectangle(161, 84, 34, 39),
+        new Rectangle(195, 84, 34, 39)
+    );
 
     public Enemy(int x, int y) {
-        this(x, y, true); // Default to part of main wave
-        setImage(ALIEN_IMG);
+        initEnemy(x, y);
+        this.isMainWave = true;
     }
 
 
     public Enemy(int x, int y, boolean isMainWave) {
         initEnemy(x, y);
         this.isMainWave = isMainWave;
-        setImage(ALIEN_IMG);
     }
 
     public boolean isMainWave() {
@@ -47,25 +39,30 @@ public class Enemy extends Sprite {
     }
 
     private void initEnemy(int x, int y) {
+        Image sheet = new ImageIcon(IMG_SPRITES).getImage();
+        loadFrames(sheet, IDLE, 1);
         this.x = x;
         this.y = y;
-
         bomb = new Bomb(x, y);
     }
 
     @Override
     public void act(int direction) {
+        updateAnimation();
         this.x += direction;
     }
 
     public Bomb getBomb() {
-
         return bomb;
     }
 
     public class Bomb extends Sprite {
 
         private boolean destroyed;
+
+        private final List<Rectangle> BOMB = List.of(
+            new Rectangle(0, 85, 8, 8)
+        );
 
         public Bomb(int x, int y) {
 
@@ -79,8 +76,8 @@ public class Enemy extends Sprite {
             this.x = x;
             this.y = y;
 
-            var ii = new ImageIcon(IMG_BOMB);
-            setImage(ii.getImage());
+            Image sheet = new ImageIcon(IMG_SPRITES).getImage();
+            loadFrames(sheet, BOMB, 2);
         }
 
         public void setDestroyed(boolean destroyed) {
@@ -95,7 +92,7 @@ public class Enemy extends Sprite {
         
         @Override
         public void act(int direction) {
-            this.y -= direction;
+            updateAnimation();
         }
     }
 
