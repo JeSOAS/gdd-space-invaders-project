@@ -74,7 +74,7 @@ public final class Game extends JFrame  {
     public void loadScene3() {
         getContentPane().removeAll();
         add(scene3);
-        titleScene.stop();
+        scene2.stop();
         scene3.start();
         revalidate();
         repaint();
